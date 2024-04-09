@@ -1,0 +1,14 @@
+{
+  "name": "Mysql-connector-sink",
+  "config": {
+    "connector.class":"io.confluent.connect.jdbc.JdbcSinkConnector",
+    "tasks.max":1,
+    "topics":"fullfillment",
+    "connection.url":"jdbc:mysql://localhost:3306/demo?user:mysqluser&password:pw",
+    "auto.create":true,
+    "value.converter.schema.registry.url":"http://localhost:8081",
+    "key.converter.schema.registry.url":"http://localhost:8081",
+    "key.converter":"io.confluent.connect.avro.AvroConverter",
+    "value.converter":"io.confluent.connect.avro.AvroConverter"
+  }
+}

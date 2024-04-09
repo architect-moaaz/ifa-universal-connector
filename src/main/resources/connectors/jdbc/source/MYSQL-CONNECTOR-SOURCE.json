@@ -1,0 +1,19 @@
+{
+  "name": "inventory-connector1212",
+  "config": {
+    "connector.class": "io.confluent.connect.jdbc.JdbcSourceConnector",
+    "connection.url": "jdbc:mysql://mysql:3306/inventory",
+    "connection.user": "test1",
+    "connection.password": "PASSWORD",
+    "tasks.max": "1",
+    "mode": "incrementing",
+    "topic.prefix": "server-2",
+    "table.whitelist": "orders",
+    "validate.non.null": false,
+    "value.converter": "io.confluent.connect.avro.AvroConverter",
+    "key.converter": "io.confluent.connect.avro.AvroConverter",
+    "key.converter.schema.registry.url": "http://103.171.99.74:32081",
+    "value.converter.schema.registry.url": "http://103.171.99.74:32081",
+    "database.history.kafka.bootstrap.servers": "103.171.99.74:31533"
+  }
+}

@@ -1,0 +1,54 @@
+version: '2'
+services:
+  zookeeper:
+    image: quay.io/debezium/zookeeper:1.9
+    ports:
+      - 2181:2181
+      - 2888:2888
+      - 3888:3888
+  kafka:
+    image: quay.io/debezium/kafka:1.9
+    ports:
+      - 29094:29092
+    links:
+      - zookeeper
+    environment:
+      ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENERS: PLAINTEXT://:9092,PLAINTEXT_HOST://:29092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://127.0.0.1:29094
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+  mongodb:
+    image: quay.io/debezium/example-mongodb:1.9
+    ports:
+      - 27017:27017
+    environment:
+      - MONGODB_USER=debezium
+      - MONGODB_PASSWORD=dbz
+  postgres:
+    image: quay.io/debezium/postgres:9.6
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgresuser
+      - POSTGRES_PASSWORD=postgrespw
+      - POSTGRES_DB=inventorydb
+  connect:
+    image: debezium/connect-jdbc:1.9
+    build:
+      context: debezium-jdbc
+      args:
+        DEBEZIUM_VERSION: 1.9
+    ports:
+      - 8083:8083
+    links:
+      - kafka
+      - mongodb
+      - postgres
+    environment:
+      - BOOTSTRAP_SERVERS=kafka:9092
+      - GROUP_ID=1
+      - CONFIG_STORAGE_TOPIC=my_connect_configs
+      - OFFSET_STORAGE_TOPIC=my_connect_offsets
+      - STATUS_STORAGE_TOPIC=my_source_connect_statuses

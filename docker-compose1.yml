@@ -1,0 +1,567 @@
+version: '2'
+services:
+  zookeeper:
+    image: quay.io/debezium/zookeeper:1.9
+    ports:
+      - 2181:2181
+      - 2888:2888
+      - 3888:3888
+  kafka:
+    image: quay.io/debezium/kafka:1.9
+    ports:
+      - 29094:29092
+    links:
+      - zookeeper
+    environment:
+      ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENERS: PLAINTEXT://:9092,PLAINTEXT_HOST://:29092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://127.0.0.1:29094
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
+  mongodb:
+    image: mongo:4.0
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+    ports:
+      - 27017:27017
+  mysql:
+    image: quay.io/debezium/example-mysql:1.9
+    ports:
+      - 3306:3306
+    environment:
+      - MYSQL_ROOT_PASSWORD=debezium
+      - MYSQL_USER=mysqluser
+      - MYSQL_PASSWORD=mysqlpw
+  #  elastic:
+  #    image: docker.elastic.co/elasticsearch/elasticsearch:7.3.0
+  #    ports:
+  #      - "9200:9200"
+  #    environment:
+  #      - http.host=0.0.0.0
+  #      - transport.host=127.0.0.1
+  #      - xpack.security.enabled=false
+  #      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+  postgres:
+    image: quay.io/debezium/postgres:9.6
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgresuser
+      - POSTGRES_PASSWORD=postgrespw
+      - POSTGRES_DB=inventory
+  connect:
+    image: debezium/connect-jdbc-es:1.9
+    build:
+      context: debezium-jdbc-es
+      args:
+        DEBEZIUM_VERSION: 1.9
+    ports:
+      - 8083:8083
+      - 5005:5005
+    links:
+      - kafka
+      - mysql
+#      - postgres
+    #      - elastic
+      - mongodb
+    environment:
+      - BOOTSTRAP_SERVERS=kafka:9092
+      - GROUP_ID=1
+      - CONFIG_STORAGE_TOPIC=my_connect_configs
+      - OFFSET_STORAGE_TOPIC=my_connect_offsets
+      - STATUS_STORAGE_TOPIC=my_source_connect_statuses
+  schema-registry:
+    image: confluentinc/cp-schema-registry:5.4.0
+    hostname: schema-registry-1
+    container_name: schema-registry-1
+    depends_on:
+      - zookeeper
+      - kafka
+    ports:
+      - "8081:8081"
+    environment:
+      SCHEMA_REGISTRY_HOST_NAME: schema-registry-1
+      SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: "zookeeper:2181"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#version: '2'
+#services:
+##  cassandra:
+##    image: cassandra:4.0
+##    ports:
+##      - 9042:9042
+##    volumes:
+##      - ~/apps/cassandra:/var/lib/cassandra
+##    environment:
+##      - CASSANDRA_CLUSTER_NAME=cloudinfra
+##  oracle:
+##    image: absolutapps/oracle-12c-ee
+##    ports:
+##      - 1521:1521
+##      - 5500:5500
+##      - 8080:8080
+##    environment:
+##      - ORACLE_ALLOW_REMOTE=true
+##      - ORACLE_ENABLE_XDB=true
+##  sqlserver:
+##    build: ./sqlserver
+##    hostname: 'sqlserver'
+##    environment:
+##      ACCEPT_EULA: Y
+##      MSSQL_SA_PASSWORD: Admin@12345
+##    ports:
+##      - 1433:1433
+##    volumes:
+##      - ms-sqlserver-data:/var/opt/mssql
+#  zookeeper:
+#    image: quay.io/debezium/zookeeper:1.9
+#    ports:
+#      - 2181:2181
+#      - 2888:2888
+#      - 3888:3888
+#  kafka:
+#    image: quay.io/debezium/kafka:1.9
+#    ports:
+#      - 29094:29092
+#    links:
+#      - zookeeper
+#    environment:
+#      ZOOKEEPER_CONNECT: zookeeper:2181
+#      KAFKA_LISTENERS: PLAINTEXT://:9092,PLAINTEXT_HOST://:29092
+#      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://127.0.0.1:29094
+#      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+#      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+#      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+##  kafka:
+##    image: quay.io/debezium/kafka:1.9
+##    ports:
+##      - 29094:29092
+##    links:
+##      - zookeeper
+##    environment:
+##      ZOOKEEPER_CONNECT: zookeeper:2181
+##      KAFKA_LISTENERS: PLAINTEXT://:9092,PLAINTEXT_HOST://:29092
+##      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://127.0.0.1:29094
+##      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+##      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+##      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+#  connect:
+#    image: debezium/connect-jdbc-es:1.9
+#    build:
+#      context: debezium-jdbc-es
+#      args:
+#        DEBEZIUM_VERSION: 1.9
+#    ports:
+#      - 8083:8083
+#      - 5005:5005
+#    links:
+#      - kafka
+#      - mysql
+#      - postgres
+#      - elastic
+#      - mongodb
+#    environment:
+#      - BOOTSTRAP_SERVERS=kafka:9092
+#      - GROUP_ID=1
+#      - CONFIG_STORAGE_TOPIC=my_connect_configs
+#      - OFFSET_STORAGE_TOPIC=my_connect_offsets
+#      - STATUS_STORAGE_TOPIC=my_source_connect_statuses
+##  connect:
+##    image: debezium/connect-jdbc:1.9
+##    build:
+##      context: debezium-jdbc
+##      args:
+##        DEBEZIUM_VERSION: 1.9
+##    ports:
+##      - 8083:8083
+###      - 5005:5005
+##    links:
+##      - kafka
+##      - elastic
+###      - oracle
+###      - cassandra
+##      - postgres
+##      - mongodb
+##      - mysql
+##    environment:
+##      - BOOTSTRAP_SERVERS=kafka:9092
+##      - GROUP_ID=1
+##      - CONFIG_STORAGE_TOPIC=my_connect_configs
+##      - OFFSET_STORAGE_TOPIC=my_connect_offsets
+##      - STATUS_STORAGE_TOPIC=my_source_connect_statuses
+##  schema-registry:
+##    image: confluentinc/cp-schema-registry:5.4.0
+##    hostname: schema-registry-1
+##    container_name: schema-registry-1
+##    depends_on:
+##      - zookeeper
+##      - kafka
+##    ports:
+##      - "8081:8081"
+##    environment:
+##      SCHEMA_REGISTRY_HOST_NAME: schema-registry-1
+##      SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: "zookeeper:2181"
+#  mysql:
+#    image: quay.io/debezium/example-mysql:1.9
+#    ports:
+#      - 3306:3306
+#    environment:
+#      - MYSQL_ROOT_PASSWORD=debezium
+#      - MYSQL_USER=mysqluser
+#      - MYSQL_PASSWORD=mysqlpw
+#  postgres:
+#    image: quay.io/debezium/postgres:9.6
+#    ports:
+#      - "5432:5432"
+#    environment:
+#      - POSTGRES_USER=postgresuser
+#      - POSTGRES_PASSWORD=postgrespw
+#      - POSTGRES_DB=inventory
+#  mongodb:
+#    image: quay.io/debezium/example-mongodb:1.9
+#    ports:
+#      - 27017:27017
+#    environment:
+#      - MONGODB_USER=debezium
+#      - MONGODB_PASSWORD=dbz
+#  elastic:
+#    image: docker.elastic.co/elasticsearch/elasticsearch:7.3.0
+#    ports:
+#      - "9200:9200"
+#    environment:
+#      - http.host=0.0.0.0
+#      - transport.host=127.0.0.1
+#      - xpack.security.enabled=false
+#      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+#
+#volumes:
+##  ms-sqlserver-data:
+##    driver: local
+#  mongodb_data_container:
+
+
+#version: '2'
+#
+#services:
+#  zookeeper:
+#    image: confluentinc/cp-zookeeper:3.2.0
+#    environment:
+#      ZOOKEEPER_CLIENT_PORT: 2181
+#      ZOOKEEPER_TICK_TIME: 2000
+#    restart: always
+#    ports: ['2181:2181']
+#  mysql:
+#    image: quay.io/debezium/example-mysql:1.9
+#    ports:
+#      - 3306:3306
+#    environment:
+#      - MYSQL_ROOT_PASSWORD=debezium
+#      - MYSQL_USER=mysqluser
+#      - MYSQL_PASSWORD=mysqlpw
+#
+#  kafka:
+#    image: confluentinc/cp-kafka:3.2.0
+#    depends_on:
+#      - zookeeper
+#    ports: ['29092:29092']
+#    environment:
+#      KAFKA_BROKER_ID: 1
+#      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+#      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+#      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+#      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+#      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+#    restart: always
+#
+#  kafka-rest:
+#    image: confluentinc/cp-kafka-rest:3.2.0
+#    depends_on:
+#      - kafka
+#      - mysql
+#    ports: ['8082:8082']
+#    environment:
+#      KAFKA_REST_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+#      KAFKA_REST_LISTENERS: http://0.0.0.0:8082
+#      KAFKA_REST_SCHEMA_REGISTRY_URL: http://schema-registry:8081
+#      KAFKA_REST_HOST_NAME: localhost
+#    restart: always
+#
+#  schema-registry:
+#    image: confluentinc/cp-schema-registry:3.2.0
+#    depends_on:
+#      - kafka
+#    ports: ['8081:8081']
+#    environment:
+#      SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: 'zookeeper:2181'
+#      SCHEMA_REGISTRY_HOST_NAME: schema-registry
+#      SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
+#    restart: always
+#
+#  connect:
+#    image: confluentinc/cp-kafka-connect:3.2.0
+#    depends_on:
+#      - zookeeper
+#      - kafka
+#      - schema-registry
+#    ports: ['8083:8083']
+#    restart: always
+#    environment:
+#      CONNECT_BOOTSTRAP_SERVERS: 'kafka:29092'
+#      CONNECT_REST_ADVERTISED_HOST_NAME: connect
+#      CONNECT_REST_PORT: 8083
+#      CONNECT_GROUP_ID: compose-connect-group
+#      CONNECT_CONFIG_STORAGE_TOPIC: docker-connect-configs
+#      CONNECT_OFFSET_STORAGE_TOPIC: docker-connect-offsets
+#      CONNECT_STATUS_STORAGE_TOPIC: docker-connect-status
+#      CONNECT_KEY_CONVERTER: io.confluent.connect.avro.AvroConverter
+#      CONNECT_KEY_CONVERTER_SCHEMA_REGISTRY_URL: http://schema-registry:8081
+#      CONNECT_VALUE_CONVERTER: io.confluent.connect.avro.AvroConverter
+#      CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: http://schema-registry:8081
+#      CONNECT_INTERNAL_KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+#      CONNECT_INTERNAL_VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+#      CONNECT_ZOOKEEPER_CONNECT: "zookeeper:2181"
+
+
+
+
+
+#---
+#version: '3'
+#
+#services:
+#  mysql:
+#    image: mysql
+#    restart: always
+#    environment:
+#      MYSQL_ROOT_PASSWORD: root
+#      MYSQL_DATABASE: test_db
+#    ports:
+#      - "3306:3306"
+#  zookeeper:
+#    image: "confluentinc/cp-zookeeper:6.1.0"
+#    container_name: zookeeper
+#    ports:
+#      - 2181:2181
+#    environment:
+#      ZOOKEEPER_CLIENT_PORT: 2181
+#      ZOOKEEPER_TICK_TIME: 2000
+#
+#  kafka:
+#    image: "confluentinc/cp-enterprise-kafka:6.1.0"
+#    container_name: kafka
+#    depends_on:
+#      - zookeeper
+#    ports:
+#      # Exposes 9092 for external connections to the broker
+#      # Use kafka:29092 for connections internal on the docker network
+#      # See https://rmoff.net/2018/08/02/kafka-listeners-explained/ for details
+#      - 29094:29092
+#    environment:
+#      KAFKA_BROKER_ID: 1
+#      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+#      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+#      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+#      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://127.0.0.1:29094
+#      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+#      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+#      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+#      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+#      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 100
+#      CONFLUENT_METRICS_ENABLE: 'false'
+#
+#
+#  schema-registry:
+#    image: "confluentinc/cp-schema-registry:6.1.0"
+#    container_name: schema-registry
+#    ports:
+#      - 8081:8081
+#    depends_on:
+#      - zookeeper
+#      - kafka
+#    volumes:
+#      - ./scripts:/scripts
+#    environment:
+#      SCHEMA_REGISTRY_HOST_NAME: schema-registry
+#      SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: zookeeper:2181
+#      SCHEMA_REGISTRY_AVRO_COMPATIBILITY_LEVEL: "none"
+#      SCHEMA_REGISTRY_LOG4J_ROOT_LOGLEVEL: "WARN"
+#  kafka-connect:
+#    image: confluentinc/cp-kafka-connect
+#    container_name: kafka-mysql-jdbc-mysql
+#    user: root
+#    ports:
+#      - 8083:8083
+#      - 5005:5005
+#    environment:
+#      CONNECT_BOOTSTRAP_SERVERS: kafka:9092
+#      CONNECT_REST_PORT: 8083
+#      CONNECT_REST_ADVERTISED_HOST_NAME: kafka-connect-jdbc-mysql-0
+#      CONNECT_GROUP_ID: kafka-connect-jdbc-mysql
+#      CONNECT_CONFIG_STORAGE_TOPIC: _kafka-connect-jdbc-mysql-configs
+#      CONNECT_OFFSET_STORAGE_TOPIC: _kafka-connect-jdbc-mysql-offsets
+#      CONNECT_STATUS_STORAGE_TOPIC: _kafka-connect-jdbc-mysql-status
+#
+#      # Schema Registry
+#      CONNECT_KEY_CONVERTER: io.confluent.connect.avro.AvroConverter
+#      CONNECT_KEY_CONVERTER_SCHEMA_REGISTRY_URL: http://localhost:8081
+#      CONNECT_KEY_CONVERTER_BASIC_AUTH_CREDENTIALS_SOURCE: "USER_INFO"
+#      CONNECT_KEY_CONVERTER_SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO: ${SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO}
+#      CONNECT_VALUE_CONVERTER: io.confluent.connect.avro.AvroConverter
+#      CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: http://localhost:8081
+#      CONNECT_VALUE_CONVERTER_BASIC_AUTH_CREDENTIALS_SOURCE: "USER_INFO"
+#      CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO: ${SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO}
+#      CONNECT_INTERNAL_KEY_CONVERTER: 'org.apache.kafka.connect.json.JsonConverter'
+#      CONNECT_INTERNAL_VALUE_CONVERTER: 'org.apache.kafka.connect.json.JsonConverter'
+#
+#      CONNECT_LOG4J_ROOT_LOGLEVEL: 'INFO'
+#      CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: "3"
+#      CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: "3"
+#      CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: "3"
+#      CONNECT_PLUGIN_PATH: /usr/share/java,/usr/share/confluent-hub-components,/data/connect-jars
+#      #
+#      CONNECT_REQUEST_TIMEOUT_MS: "20000"
+#      CONNECT_SASL_MECHANISM: "PLAIN"
+#      CONNECT_RETRY_BACKOFF_MS: "500"
+#      CONNECT_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: "https"
+#      CONNECT_SECURITY_PROTOCOL: "SASL_SSL"
+#      CONNECT_SASL_JAAS_CONFIG: ${JAAS_CONFIG}
+#      CONNECT_CONSUMER_SASL_JAAS_CONFIG: ${JAAS_CONFIG}
+#      CONNECT_PRODUCER_SASL_JAAS_CONFIG: ${JAAS_CONFIG}
+#      #
+#      CONNECT_CONSUMER_SECURITY_PROTOCOL: "SASL_SSL"
+#      CONNECT_CONSUMER_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: "https"
+#      CONNECT_CONSUMER_SASL_MECHANISM: "PLAIN"
+#      CONNECT_CONSUMER_REQUEST_TIMEOUT_MS: "20000"
+#      CONNECT_CONSUMER_RETRY_BACKOFF_MS: "500"
+#      #
+#      CONNECT_PRODUCER_SECURITY_PROTOCOL: SASL_SSL
+#      CONNECT_PRODUCER_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: "https"
+#      CONNECT_PRODUCER_SASL_MECHANISM: "PLAIN"
+#      CONNECT_PRODUCER_REQUEST_TIMEOUT_MS: "20000"
+#      CONNECT_PRODUCER_RETRY_BACKOFF_MS: "500"
+#      CONNECT_LOG4J_APPENDER_STDOUT_LAYOUT_CONVERSIONPATTERN: "[%d] %p %X{connector.context}%m (%c:%L)%n"
+#      #
+#      CONNECT_OFFSET_FLUSH_TIMEOUT_MS: "60000"
+#      CONNECT_OFFSET_FLUSH_INTERVAL_MS: "10000"
+#      KAFKA_PRODUCER_MAX_REQUEST_SIZE: "10485760"
+#      CONNECT_PRODUCER_MAX_REQUEST_SIZE: "10485760"
+#      KAFKA_HEAP_OPTS: "-Xmx10g"
+#
+#    command:
+#      - bash
+#      - -c
+#      - |
+#        echo "Installing Kafka Confluent Connector"
+#        confluent-hub install --no-prompt confluentinc/kafka-connect-jdbc:10.0.0
+#        echo "Installing MySQL JDBC Driver"
+#        cd /usr/share/confluent-hub-components/confluentinc-kafka-connect-jdbc/lib
+#        curl https://repo1.maven.org/maven2/mysql/mysql-connector-java/8.0.25/mysql-connector-java-8.0.25.jar -o mysql-connector-java-8.0.25.jar
+#        #
+#        echo "Launching Kafka Connect worker"
+#        /etc/confluent/docker/run &
+#        #
+#        echo "Waiting for Kafka Connect to start listening on 0.0.0.0:8083 ⏳"
+#        while : ; do
+#          curl_status=$$(curl -s -o /dev/null -w %{http_code} http://0.0.0.0:8083/connectors)
+#          echo -e $$(date) " Kafka Connect listener HTTP state: " $$curl_status " (waiting for 200)"
+#          if [ $$curl_status -eq 200 ] ; then
+#          break
+#          fi
+#          sleep 5
+#        done
+#        sleep infinity
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+##version: '2'
+##services:
+##  zookeeper:
+##    image: quay.io/debezium/zookeeper:1.9
+##    ports:
+##      - 2181:2181
+##      - 2888:2888
+##      - 3888:3888
+##  kafka:
+##    image: quay.io/debezium/kafka:1.9
+##    ports:
+##      - 9092:9092
+##    links:
+##      - zookeeper
+##    environment:
+##      - ZOOKEEPER_CONNECT=zookeeper:2181
+##  mysql:
+##    image: quay.io/debezium/example-mysql:1.9
+##    ports:
+##      - 3306:3306
+##    environment:
+##      - MYSQL_ROOT_PASSWORD=debezium
+##      - MYSQL_USER=mysqluser
+##      - MYSQL_PASSWORD=mysqlpw
+###  elastic:
+###    image: docker.elastic.co/elasticsearch/elasticsearch:7.3.0
+###    ports:
+###      - "9200:9200"
+###    environment:
+###      - http.host=0.0.0.0
+###      - transport.host=127.0.0.1
+###      - xpack.security.enabled=false
+###      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+##  connect:
+##    image: debezium/connect-jdbc-es:1.9
+##    build:
+##      context: debezium-jdbc-es
+##      args:
+##        DEBEZIUM_VERSION: 1.9
+##    ports:
+##      - 8083:8083
+##      - 5005:5005
+##    links:
+##      - kafka
+##      - mysql
+##      - elastic
+##    environment:
+##      - BOOTSTRAP_SERVERS=kafka:9092
+##      - GROUP_ID=1
+##      - CONFIG_STORAGE_TOPIC=my_connect_configs
+##      - OFFSET_STORAGE_TOPIC=my_connect_offsets
+##      - STATUS_STORAGE_TOPIC=my_source_connect_statuses

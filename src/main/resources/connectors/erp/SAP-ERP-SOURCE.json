@@ -1,0 +1,23 @@
+{
+  "name": "sap-erp-source",
+  "config": {
+    "connector.class": "com.sap.kafka.connect.source.erp.SapErpSourceConnector",
+    "tasks.max": 1,
+    "topics": "sap-erp-data",
+    "connection.url": "jdbc:sap://<host>:<port>/",
+    "connection.user": "<user>",
+    "connection.password": "<password>",
+    "connection.rfc.dest": "<rfc_destination>",
+    "table.name": "<table_name>",
+    "table.poll.interval.ms": "60000",
+    "mode": "r3",
+    "sap.client": "100",
+    "sap.language": "EN",
+    "sap.system.number": "<system_number>",
+    "sap.ashost": "<application_server_hostname>",
+    "sap.sysnr": "<system_number>",
+    "sap.client": "<client_number>",
+    "sap.user": "<user>",
+    "sap.password": "<password>"
+  }
+}

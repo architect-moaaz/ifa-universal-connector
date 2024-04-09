@@ -1,0 +1,17 @@
+{
+  "name": "mongo-sk-1",
+  "config": {
+    "connector.class": "com.mongodb.kafka.connect.MongoSinkConnector",
+    "tasks.max": "1",
+    "topics": "sftp-test2",
+    "connection.uri": "mongodb://uatadmin:hau2Opeef7Hoos8eeNgo@151.106.39.195:32030/inventory?authSource=admin&w=1&journal=true",
+    "database": "inventory",
+    "collection": "details",
+    "auto.create":"true",
+    "insert.mode":"upsert",
+    "key.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "key.converter.schema.registry.url": "http://103.171.99.74:32081",
+    "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "value.converter.schema.registry.url": "http://103.171.99.74:32081"
+  }
+}

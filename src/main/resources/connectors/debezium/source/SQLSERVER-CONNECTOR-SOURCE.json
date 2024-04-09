@@ -1,0 +1,15 @@
+{
+  "name": "Mysql-connector-source",
+  "config": {
+    "connector.class":"io.aiven.connect.jdbc.JdbcSourceConnector",
+    "connection.url":"jdbc:sqlserver://demo-sqlserver-myproject.aivencloud.com:13039;databaseName=defaultdb;",
+    "connection.user":"avnadmin",
+    "connection.password":"mypassword123",
+    "table.whitelist":"students,exams",
+    "mode":"incrementing",
+    "incrementing.column.name":"id",
+    "topic.prefix":"jdbc_source_sqlserver_increment.",
+    "tasks.max":"1",
+    "poll.interval.ms":"5000"
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "name": "sftp-47",
+  "config": {
+    "tasks.max": 1,
+    "connector.class": "io.confluent.connect.sftp.SftpJsonSourceConnector",
+    "input.path": "/SFTPRoot/",
+    "error.path": "/error",
+    "input.file.parser.format": "JSON",
+    "finished.path": "/finished",
+    "cleanup.policy": "NONE",
+    "behavior.on.error": "IGNORE",
+    "sftp.username": "Akhil",
+    "sftp.password": "8285",
+    "sftp.host": "172.31.32.1",
+    "sftp.port": "22",
+    "kafka.topic": "sftp-test2",
+    "bootstrap.servers": "localhost:9092",
+    "acks": "1",
+    "input.file.pattern": ".*\\.json",
+    "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "key.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "key.converter.schema.registry.url": "http://kubernetes.docker.internal:8081",
+    "value.converter.schema.registry.url": "http://kubernetes.docker.internal:8081",
+    "transforms": "route",
+    "transforms.route.type": "org.apache.kafka.connect.transforms.RegexRouter",
+    "transforms.route.regex": "([^.]+)\\.([^.]+)\\.([^.]+)",
+    "transforms.route.replacement": "$3",
+    "schema.generation.enabled": true,
+    "poll.interval.ms": 1000,
+    "log4j.logger.org.apache.kafka.connect.source":"DEBUG"
+  }
+}

@@ -1,0 +1,209 @@
+version: '2'
+services:
+  mysql:
+    image: quay.io/debezium/example-mysql:1.9
+    ports:
+      - 33306:3306
+    environment:
+      - MYSQL_ROOT_PASSWORD=debezium
+      - MYSQL_USER=mysqluser
+      - MYSQL_PASSWORD=mysqlpw
+#  elastic:
+#    image: docker.elastic.co/elasticsearch/elasticsearch:7.3.0
+#    ports:
+#      - "9200:9200"
+#    environment:
+#      - http.host=0.0.0.0
+#      - transport.host=127.0.0.1
+#      - xpack.security.enabled=false
+#      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+#      - postgres
+#      - elastic
+#      - mongodb
+  schema-registry:
+     image: confluentinc/cp-schema-registry:5.4.0
+     hostname: schema-registry-1
+     container_name: schema-registry-1
+     ports:
+       - "8081:8081"
+     environment:
+       SCHEMA_REGISTRY_HOST_NAME: schema-registry-1
+       SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: "151.106.38.94:2181"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#version: '2'
+#services:
+##  cassandra:
+##    image: cassandra:4.0
+##    ports:
+##      - 9042:9042
+##    volumes:
+##      - ~/apps/cassandra:/var/lib/cassandra
+##    environment:
+##      - CASSANDRA_CLUSTER_NAME=cloudinfra
+##  oracle:
+##    image: absolutapps/oracle-12c-ee
+##    ports:
+##      - 1521:1521
+##      - 5500:5500
+##      - 8080:8080
+##    environment:
+##      - ORACLE_ALLOW_REMOTE=true
+##      - ORACLE_ENABLE_XDB=true
+##  sqlserver:
+##    build: ./sqlserver
+##    hostname: 'sqlserver'
+##    environment:
+##      ACCEPT_EULA: Y
+##      MSSQL_SA_PASSWORD: Admin@12345
+##    ports:
+##      - 1433:1433
+##    volumes:
+##      - ms-sqlserver-data:/var/opt/mssql
+#  zookeeper:
+#    image: quay.io/debezium/zookeeper:1.9
+#    ports:
+#      - 2181:2181
+#      - 2888:2888
+#      - 3888:3888
+#  kafka:
+#    image: quay.io/debezium/kafka:1.9
+#    ports:
+#      - 29094:29092
+#    links:
+#      - zookeeper
+#    environment:
+#      ZOOKEEPER_CONNECT: zookeeper:2181
+#      KAFKA_LISTENERS: PLAINTEXT://:9092,PLAINTEXT_HOST://:29092
+#      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://127.0.0.1:29094
+#      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+#      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+#      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+##  kafka:
+##    image: quay.io/debezium/kafka:1.9
+##    ports:
+##      - 29094:29092
+##    links:
+##      - zookeeper
+##    environment:
+##      ZOOKEEPER_CONNECT: zookeeper:2181
+##      KAFKA_LISTENERS: PLAINTEXT://:9092,PLAINTEXT_HOST://:29092
+##      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://127.0.0.1:29094
+##      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+##      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+##      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+#  connect:
+#    image: debezium/connect-jdbc-es:1.9
+#    build:
+#      context: debezium-jdbc-es
+#      args:
+#        DEBEZIUM_VERSION: 1.9
+#    ports:
+#      - 8083:8083
+#      - 5005:5005
+#    links:
+#      - kafka
+#      - mysql
+#      - postgres
+#      - elastic
+#      - mongodb
+#    environment:
+#      - BOOTSTRAP_SERVERS=kafka:9092
+#      - GROUP_ID=1
+#      - CONFIG_STORAGE_TOPIC=my_connect_configs
+#      - OFFSET_STORAGE_TOPIC=my_connect_offsets
+#      - STATUS_STORAGE_TOPIC=my_source_connect_statuses
+##  connect:
+##    image: debezium/connect-jdbc:1.9
+##    build:
+##      context: debezium-jdbc
+##      args:
+##        DEBEZIUM_VERSION: 1.9
+##    ports:
+##      - 8083:8083
+###      - 5005:5005
+##    links:
+##      - kafka
+##      - elastic
+###      - oracle
+###      - cassandra
+##      - postgres
+##      - mongodb
+##      - mysql
+##    environment:
+##      - BOOTSTRAP_SERVERS=kafka:9092
+##      - GROUP_ID=1
+##      - CONFIG_STORAGE_TOPIC=my_connect_configs
+##      - OFFSET_STORAGE_TOPIC=my_connect_offsets
+##      - STATUS_STORAGE_TOPIC=my_source_connect_statuses
+##  schema-registry:
+##    image: confluentinc/cp-schema-registry:5.4.0
+##    hostname: schema-registry-1
+##    container_name: schema-registry-1
+##    depends_on:
+##      - zookeeper
+##      - kafka
+##    ports:
+##      - "8081:8081"
+##    environment:
+##      SCHEMA_REGISTRY_HOST_NAME: schema-registry-1
+##      SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: "zookeeper:2181"
+#  mysql:
+#    image: quay.io/debezium/example-mysql:1.9
+#    ports:
+#      - 3306:3306
+#    environment:
+#      - MYSQL_ROOT_PASSWORD=debezium
+#      - MYSQL_USER=mysqluser
+#      - MYSQL_PASSWORD=mysqlpw
+#  postgres:
+#    image: quay.io/debezium/postgres:9.6
+#    ports:
+#      - "5432:5432"
+#    environment:
+#      - POSTGRES_USER=postgresuser
+#      - POSTGRES_PASSWORD=postgrespw
+#      - POSTGRES_DB=inventory
+#  mongodb:
+#    image: quay.io/debezium/example-mongodb:1.9
+#    ports:
+#      - 27017:27017
+#    environment:
+#      - MONGODB_USER=debezium
+#      - MONGODB_PASSWORD=dbz
+#  elastic:
+#    image: docker.elastic.co/elasticsearch/elasticsearch:7.3.0
+#    ports:
+#      - "9200:9200"
+#    environment:
+#      - http.host=0.0.0.0
+#      - transport.host=127.0.0.1
+#      - xpack.security.enabled=false
+#      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+#
+#volumes:
+##  ms-sqlserver-data:
+##    driver: local
+#  mongodb_data_container:

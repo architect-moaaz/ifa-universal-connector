@@ -1,0 +1,21 @@
+{
+  "name": "inventory-connector",
+  "config": {
+    "connector.class": "io.confluent.connect.jdbc.JdbcSourceConnector",
+    "connection.url": "jdbc:mysql://mysql:3306/inventory",
+    "connection.user": "mysqluser",
+    "connection.password": "mysqlpw",
+    "tasks.max": "1",
+    "mode": "bulk",
+    "topic.prefix": "inventory",
+    "table.whitelist": "customers",
+    "value.converter": "io.confluent.connect.avro.AvroConverter",
+    "key.converter": "io.confluent.connect.avro.AvroConverter",
+    "key.converter.schema.registry.url": "http://kubernetes.docker.internal:8081",
+    "value.converter.schema.registry.url": "http://kubernetes.docker.internal:8081",
+    "transforms": "route",
+    "transforms.route.type": "org.apache.kafka.connect.transforms.RegexRouter",
+    "transforms.route.regex": "([^.]+)\\.([^.]+)\\.([^.]+)",
+    "transforms.route.replacement": "$3"
+  }
+}

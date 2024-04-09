@@ -1,0 +1,18 @@
+{
+  "name": "postgres-connector",
+  "config": {
+    "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
+    "tasks.max": "1",
+    "database.hostname": "postgres",
+    "database.port": "5432",
+    "database.user": "postgresuser",
+    "database.password": "postgrespw",
+    "topic.prefix":"dbserver1",
+    "database.dbname" : "postgres",
+    "database.server.name": "dbserver1",
+    "table.whitelist": "inventory.customers",
+    "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "value.converter.schemas.enable": false,
+    "decimal.handling.mode": "double"
+  }
+}
